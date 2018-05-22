@@ -1,5 +1,6 @@
 from runner.remote_analysis_runner import RemoteAnalysisRunner
 from entropy import shannon_entropy
+import time
 
 BLOCK_SIZE = 32
 MINIMAL_PADDING_BYTES = 128
@@ -15,7 +16,7 @@ class AnalysisPlugin(RemoteAnalysisRunner):
     def __init__(self):
         super().__init__(self.NAME, self.VERSION)
 
-    def process_object(self, binary: bytes, dependent_analysis: dict):
+    def process_object(self, binary: bytes, dependent_analysis: dict) -> dict:
         result = dict(summary=list())
 
         for value in [0, 255]:
