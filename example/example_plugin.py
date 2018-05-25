@@ -1,6 +1,6 @@
-from runner.remote_analysis_runner import RemoteAnalysisRunner
 from entropy import shannon_entropy
-import time
+
+from runner.remote_analysis_runner import RemoteAnalysisRunner
 
 BLOCK_SIZE = 32
 MINIMAL_PADDING_BYTES = 128
@@ -60,7 +60,7 @@ class AnalysisPlugin(RemoteAnalysisRunner):
         for item in block[first:]:
             if item != byte_value:
                 return False
-        return True
+        return True if block else False
 
 
 if __name__ == '__main__':

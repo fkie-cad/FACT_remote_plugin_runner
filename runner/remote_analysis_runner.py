@@ -18,9 +18,14 @@ class RemoteAnalysisRunner:
 
         self._in_connection, self._in_channel, self._in_queue = self._set_up_in_channel()
 
-        self._out_connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_HOST))
-        self._out_channel = self._out_connection.channel()
-        self._out_channel.exchange_declare(exchange=RABBIT_OUT_EXCHANGE, exchange_type='direct')
+        self._out_connection, self._out_channel = self._set_up_out_channel()
+
+    @staticmethod
+    def _set_up_out_channel() -> tuple:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_HOST))
+        channel = connection.channel()
+        channel.exchange_declare(exchange=RABBIT_OUT_EXCHANGE, exchange_type='direct')
+        return connection, channel
 
     def _set_up_in_channel(self):
         connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_HOST))
@@ -69,7 +74,7 @@ class RemoteAnalysisRunner:
 
         return 0
 
-    def _task_in_callback(self, ch: pika.adapters.blocking_connection.BlockingChannel, method: pika.spec.Basic.Deliver, properties: pika.BasicProperties, body: bytes):
+    def _task_in_callback(self, ch: pika.adapters.blocking_connection.BlockingChannel, method: pika.spec.Basic.Deliver, _, body: bytes):
         print('[{}][INFO] Processing a task'.format(int(time.time())))
         task_message = self.deserialize(body)
         ch.basic_ack(delivery_tag=method.delivery_tag)
