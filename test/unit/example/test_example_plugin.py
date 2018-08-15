@@ -24,10 +24,10 @@ def test_process_object_failed(stub_plugin: AnalysisPlugin):
 
 
 def test_find_run_of_byte(stub_plugin: AnalysisPlugin):
-    assert not stub_plugin.find_run_of_byte(b'', 0)
-    assert not stub_plugin.find_run_of_byte(b'\xFF', 0)
-    assert not stub_plugin.find_run_of_byte(b'\xFF' * 33 + b'\x00' * 100, 0)
-    assert stub_plugin.find_run_of_byte(b'\x00', 0)
+    assert not stub_plugin._find_run_of_byte(b'', 0)
+    assert not stub_plugin._find_run_of_byte(b'\xFF', 0)
+    assert not stub_plugin._find_run_of_byte(b'\xFF' * 33 + b'\x00' * 100, 0)
+    assert stub_plugin._find_run_of_byte(b'\x00', 0)
 
 
 def test_test_for_padding(stub_plugin: AnalysisPlugin):
@@ -35,8 +35,8 @@ def test_test_for_padding(stub_plugin: AnalysisPlugin):
     good_offset, bad_offset = 0, 200
     byte_value = 255
 
-    assert stub_plugin.test_for_padding(binary, good_offset, byte_value)
-    assert not stub_plugin.test_for_padding(binary, bad_offset, byte_value)
+    assert stub_plugin._test_block_for_padding(binary, good_offset, byte_value)
+    assert not stub_plugin._test_block_for_padding(binary, bad_offset, byte_value)
 
 
 def test_detect_padding_for_specific_byte(stub_plugin: AnalysisPlugin):

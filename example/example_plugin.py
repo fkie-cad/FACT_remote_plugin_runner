@@ -1,3 +1,5 @@
+from time import sleep
+
 from entropy import shannon_entropy
 
 from runner.remote_analysis_runner import RemoteAnalysisRunner
@@ -27,21 +29,21 @@ class AnalysisPlugin(RemoteAnalysisRunner):
 
         return result
 
-    def _detect_padding_for_specific_byte(self, binary: bytes, byte_value: int):
+    def _detect_padding_for_specific_byte(self, binary: bytes, byte_value: int) -> bool:
         offset = 0
 
         block = binary[offset:offset+BLOCK_SIZE]
         while len(block) > 0:
             if shannon_entropy(block) < 0.1:
-                padding = self.test_for_padding(binary, offset, byte_value)
-                if padding:
+                has_padding = self._test_block_for_padding(binary, offset, byte_value)
+                if has_padding:
                     return True
             offset += BLOCK_SIZE
             block = binary[offset:offset+BLOCK_SIZE]
 
         return False
 
-    def test_for_padding(self, binary: bytes, offset: int, byte_value : int):
+    def _test_block_for_padding(self, binary: bytes, offset: int, byte_value : int) -> bool:
         block = binary[offset:offset + MINIMAL_PADDING_BYTES]
 
         if not byte_value in block:
@@ -50,10 +52,10 @@ class AnalysisPlugin(RemoteAnalysisRunner):
             if not shannon_entropy(block) < 0.1:
                 return False
             else:
-                return self.find_run_of_byte(block, byte_value)
+                return self._find_run_of_byte(block, byte_value)
 
     @staticmethod
-    def find_run_of_byte(block: bytes, byte_value: int):
+    def _find_run_of_byte(block: bytes, byte_value: int) -> bool:
         first = block.find(byte_value)
         if first > BLOCK_SIZE:
             return False

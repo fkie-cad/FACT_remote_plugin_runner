@@ -5,6 +5,7 @@ import time
 
 import pika
 
+JOB_QUEUE = 'job_queue'
 RABBIT_HOST = 'localhost'
 RABBIT_IN_EXCHANGE = 'task_out'
 RABBIT_OUT_EXCHANGE = 'task_write_back'
@@ -32,7 +33,7 @@ class RemoteAnalysisRunner:
         channel = connection.channel()
         channel.exchange_declare(exchange=RABBIT_IN_EXCHANGE, exchange_type='topic')
 
-        queue = channel.queue_declare()
+        queue = channel.queue_declare(queue=JOB_QUEUE)
         channel.queue_bind(
             exchange=RABBIT_IN_EXCHANGE,
             queue=queue.method.queue,
@@ -69,16 +70,13 @@ class RemoteAnalysisRunner:
         except KeyboardInterrupt:
             print('Shutting down gracefully ..')
 
-        self._in_connection.close()
-        self._out_connection.close()
-
         return 0
 
     def _task_in_callback(self, ch: pika.adapters.blocking_connection.BlockingChannel, method: pika.spec.Basic.Deliver, _, body: bytes):
         print('[{}][INFO] Processing a task'.format(int(time.time())))
         task_message = self.deserialize(body)
-        ch.basic_ack(delivery_tag=method.delivery_tag)
         self._process_task(task_message)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def _get_topic(self) -> str:
         return 'analysis.{}.normal'.format(self._name)

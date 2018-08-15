@@ -1,4 +1,4 @@
-from analysis.RemotePluginBase import RemoteBasePlugin
+from analysis.remote_plugin_base import RemoteBasePlugin
 
 
 class AnalysisPlugin(RemoteBasePlugin):
